@@ -1,0 +1,34 @@
+name: Image Security Scan
+
+on:
+  push:
+    paths:
+      - "images/**"
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install ClamAV
+        run: sudo apt-get update && sudo apt-get install -y clamav && sudo freshclam
+
+      - name: Run Image Scanner
+        run: python scripts/scan_images.py
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: image-scan-report
+          path: reports/image_scan_report.md
