@@ -28,7 +28,7 @@ jobs:
         run: python scripts/scan_images.py
 
       - name: Upload Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: image-scan-report
           path: reports/image_scan_report.md
