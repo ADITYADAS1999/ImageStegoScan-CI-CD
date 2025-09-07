@@ -1,15 +1,5 @@
-# StegoGuard-CI-CD
+# 🔐 Automated Docker image Security Scanner  
 StegoScan-CI-CD is a GitHub Actions workflow that scans images (.jpg, .png, .jpeg) for steganography payloads, hidden scripts, or malicious content. It automatically generates a security report during CI/CD to detect vulnerable or weaponized images before deployment.
-
-
-
-# Mailcious_Docs_scan_CI_CD
-Mailcious_Docs_scan_CI_CD is a GitHub Actions workflow that automatically scans documents (.pdf, .docx, .txt) pushed to the repository for hidden QR codes or malicious links. It analyzes embedded content for suspicious patterns, flags potential threats, and generates detailed security reports as CI/CD artifacts.
-
-
-
-
-
 
 
 
@@ -18,34 +8,21 @@ Mailcious_Docs_scan_CI_CD is a GitHub Actions workflow that automatically scans 
 ![logo](https://github.com/user-attachments/assets/5ccf6f4b-6e3d-4472-be96-75ddda499fbd)
 
 
-# 🔐 Automated Docker image Security Scanner  
-
-
-In the modern era, most organizations have shifted from **monolithic architectures** to **microservices-based applications** deployed in **containerized environments** such as Docker and Kubernetes. While this transition improves scalability, agility, and deployment speed, it also introduces **new security challenges**. With CI/CD pipelines powering rapid software delivery, ensuring security at every stage—known as **DevSecOps**—has become a critical requirement.  
-
-One of the major concerns in this landscape is the **detection and remediation of vulnerabilities** in Docker images, application code, and dependencies. Without continuous scanning and compliance mapping, organizations risk exposing their systems to attackers.  
-
-To address this, we developed a **GitHub Actions workflow** that automatically:  
-- Scans Docker images for vulnerabilities using **Trivy, Bandit, and Docker Scout**.  
-- Generates **JSON and PDF reports** for detailed analysis.  
-- Maps detected vulnerabilities to **NIST Cybersecurity Framework (CSF)**, **MITRE ATT&CK techniques**, and **OWASP Top 10 risks**.  
-
-This project demonstrates **automated DevSecOps practices** and provides a framework for **threat assessment, vulnerability management, and compliance reporting** directly within the CI/CD pipeline.  
 
 
 ## 📌 Introduction  
-Containers have become the backbone of modern application deployment, but they also introduce unique security challenges.  
-This project, **Automated Docker Security Scanner**, was designed to address those challenges by **automating vulnerability scanning of Docker images and applications**.  
 
-It combines multiple open-source tools and recognized cybersecurity frameworks into a single workflow.  
-The output is a **professional, consolidated PDF report** that organizations can use to detect, analyze, and mitigate security risks.  
+In today’s digital landscape, images are widely used for communication, sharing, and storage. However, they can also be exploited to hide malicious payloads, scripts, or confidential data using steganography techniques. Such weaponized images pose serious threats when uploaded to corporate systems, shared across social platforms, or embedded in software releases.
+
+To mitigate these risks, we developed ImageStegoScan-CI-CD, a GitHub Actions workflow that automatically:
 
 Key Features:  
-- Scans Docker images and code for vulnerabilities.  
-- Maps findings to **NIST CSF**, **MITRE ATT&CK**, and **OWASP Top 10**.  
-- Automatically runs in **GitHub Actions** for CI/CD pipelines.  
-- Generates a **detailed PDF report** with charts and compliance mappings.  
-
+-  Scans `.jpg`, `.png`, and `.jpeg` images for **hidden payloads**.
+-  Extracts and analyzes **metadata** for suspicious content.
+-  Detects potential **steganography techniques** used by attackers.
+-  Generates **JSON and PDF reports** with compliance mapping.
+-   Runs automatically in **GitHub Actions** workflows.
+  
 ---
 
 ## 📂 File Structure  
@@ -54,62 +31,52 @@ Key Features:
 
 ```bash
 .
-├── .github/
-│   └── workflows/
-│       └── docker-scan.yml        # GitHub Actions workflow (runs scans automatically)
+ImageStegoScan-CI-CD/
 │
-├── docker/
-│   ├── Dockerfile                 # Custom Dockerfile used for building/scanning
-│   └── app/
-│       └── main.py                # Example Python application code to scan
+├── .github/workflows/
+│   └── image_scan.yml         # GitHub Actions CI/CD pipeline
+│
+├── images/                    # Sample input images for scanning
+│   ├── example-stegano.png
+│   ├── img_01.jpg
+│   ├── img_02.jpg
+│   └── img_03.png
+│
+├── reports/                   # Output reports after scan
+│   └── example.txt
 │
 ├── scripts/
-│   ├── generate_report.py         # Combines all scan results and produces a PDF
-│   ├── gen_charts.py              # Optional: Generates Matplotlib charts for reports
-│   └── mappings.py                # Maps findings to NIST CSF, MITRE, and OWASP
+│   └── scan_images.py         # Main script for scanning images
 │
-├── assets/
-│   └── severity_chart.png         # Example chart embedded in the final PDF
-│
-├── reports/                       # JSON outputs of all scans
-│   ├── trivy.json                 # Docker image vulnerabilities (Trivy)
-│   ├── bandit.json                # Python code analysis (Bandit)
-│   ├── docker_scout.json          # Dependency scans (Docker Scout)
-│   ├── mitre_T1003.json           # Example MITRE ATT&CK mapping output
-│   └── nist_report.json           # Consolidated report with NIST mapping
-│
-├── requirements.txt               # Python dependencies for scripts
-├── report.pdf                     # Generated PDF report (final output)
-└── README.md
+├── LICENSE
+├── README.md
+└── requirements.txt           # Python dependencies
+
 ```
 
 **Explanation of structure:**  
-- **`.github/workflows`** → CI/CD pipeline that triggers scans automatically on each commit.  
-- **`docker/`** → Contains the Dockerfile and app to be scanned.  
-- **`scripts/`** → Automation scripts for generating reports and framework mappings.  
-- **`assets/`** → Images and charts used in PDF reporting.  
-- **`reports/`** → Stores raw JSON scan results and final consolidated outputs.  
-- **`requirements.txt`** → Lists dependencies (ReportLab, Matplotlib, etc.).  
-- **`report.pdf`** → The final professional security report.  
+- **`.github/workflows`** → CI/CD pipeline definition (`image_scan.yml`) that automatically triggers the image scanning workflow on each commit or pull request.  
+- **`images/`** → Stores input image files (`.jpg`, `.png`, `.jpeg`) that will be scanned for steganography or malicious payloads.  
+- **`scripts/`** → Contains automation scripts (`scan_images.py`) responsible for scanning images and generating reports.  
+- **`reports/`** → Stores the generated scan reports (e.g., text/JSON output). Can be extended to include consolidated PDF reports.  
+- **`requirements.txt`** → Lists Python dependencies required for running the scanner (e.g., Pillow, ExifTool bindings, etc.).  
+- **`LICENSE`** → License file for the project.  
+- **`README.md`** → Documentation file describing the project, usage, and setup instructions.  
+
 
 ---
 
 ## 🛠️ Technology Used  
 
-- **Backend:** Python (scripts for scanning, mapping, and report generation).  
-- **Frontend/Reports:**  
-  - ReportLab → To generate structured PDF reports.  
-  - Matplotlib → To generate severity charts and visual data.  
+- **Backend:** Python (scripts for image scanning, metadata extraction, and report generation).  
+- **Reports/Visualization:**  
+  - ReportLab → To generate structured PDF reports (optional extension).  
+  - Matplotlib → To generate severity charts and visual analysis (optional extension).  
 - **Security Tools:**  
-  - **Trivy** → Detects vulnerabilities in Docker images.  
-  - **Bandit** → Analyzes Python code for common security issues.  
-  - **Docker Scout** → Checks image dependencies against known CVEs.  
-- **Frameworks:**  
-  - **NIST CSF** → Compliance & categorization.  
-  - **MITRE ATT&CK** → Threat actor technique mapping.  
-  - **OWASP Top 10** → Common web application risks.  
-- **CI/CD:** GitHub Actions (automated scans in pipeline).  
-- **Containerization:** Docker (for image builds and scans).  
+  - **ExifTool** → Extracts and analyzes image metadata for anomalies.  
+  - **StegExpose / Steghide (optional)** → Detects steganography payloads in images.  
+  - **Custom Python Scripts** → Implements detection logic and scanning automation.  
+- **CI/CD:** GitHub Actions (automated scans integrated into the pipeline).  
 
 ---
 
@@ -231,35 +198,6 @@ The workflow runs automatically on every push to the `main` branch and executes 
 
 
 
-
-## ⚡ Security Framework Integration  
-
-### 🔹 NIST Cybersecurity Framework (CSF)  
-The **NIST CSF** provides five functions: **Identify, Protect, Detect, Respond, Recover**.  
-Each vulnerability is automatically mapped to one of these functions.  
-For example:  
-- A missing patch may map to **Protect**.  
-- An insecure API exposure may map to **Detect/Respond**.  
-
-This ensures findings are not just technical but **aligned with compliance requirements**.  
-
-### 🔹 MITRE ATT&CK  
-The **MITRE ATT&CK** knowledge base describes how attackers exploit systems.  
-Vulnerabilities detected are mapped to adversarial techniques.  
-For example:  
-- Credential leakage → **T1003 (Credential Dumping)**.  
-- Insecure file permissions → **T1078 (Valid Accounts)**.  
-
-This allows security teams to understand **how real attackers might exploit vulnerabilities**.  
-
-### 🔹 OWASP Top 10  
-The **OWASP Top 10** is an industry-standard list of the most critical web application risks.  
-This scanner maps findings to OWASP categories, such as:  
-- **A01: Broken Access Control**  
-- **A03: Injection Attacks**  
-- **A04: Insecure Design**  
-
-This helps prioritize remediation according to **global best practices**.  
 
 ---
 
