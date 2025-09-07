@@ -160,7 +160,6 @@ The workflow runs automatically on every push to the `main` branch and executes 
 - Findings from image scans
 - Metadata anomalies
 - Severity breakdown (charts)
-- Compliance mappings (NIST, MITRE, OWASP)
 - Output: reports/final_report.pdf
 
 
