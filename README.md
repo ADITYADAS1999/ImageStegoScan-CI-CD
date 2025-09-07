@@ -1,4 +1,4 @@
-# 🔐 Automated Docker image Security Scanner  
+# 🔐 ImageStegoScan-CI-CD Security Scanner  
 StegoScan-CI-CD is a GitHub Actions workflow that scans images (.jpg, .png, .jpeg) for steganography payloads, hidden scripts, or malicious content. It automatically generates a security report during CI/CD to detect vulnerable or weaponized images before deployment.
 
 
@@ -82,106 +82,90 @@ ImageStegoScan-CI-CD/
 
 ## ⚙️ Workflow & Tools Used  
 
-This project includes a **GitHub Actions workflow** (`.github/workflows/docker-scan.yml`) that automates the **DevSecOps security pipeline**.  
+This project includes a **GitHub Actions workflow** (`.github/workflows/image_scan.yml`) that automates the **image steganography security pipeline**.  
 The workflow runs automatically on every push to the `main` branch and executes the following stages:  
 
 ---
 
-### 🔹 1. Build Docker Image  
+### 🔹 1. Checkout Repository  
 ```yaml
-- name: Build Docker Image
-  run: docker build -t my-custom-app:latest ./docker
+- name: Checkout Repository
+  uses: actions/checkout@v3
 ```
-- Tool: Docker
-- Purpose: Builds the application container image from the Dockerfile inside the ./docker directory.
-- Output: A containerized application (my-custom-app:latest) that is ready for security scanning.
+- Tool: GitHub Actions
+- Purpose: Fetches the repository contents so that images and scripts can be scanned.
+- Output: Repository files available in the workflow environment.
 
 
-### 🔹 2. Trivy (Docker Image Vulnerability Scanner)
-
-```
-- name: Run Trivy Docker Scan
-  run: trivy image --ignore-unfixed --exit-code 0 --format json --output reports/trivy.json my-custom-app:latest
-```
-- Tool: Trivy
-- Purpose: Scans the built Docker image for known vulnerabilities (CVEs) in OS packages and dependencies.
-- Output: reports/trivy.json → JSON report containing vulnerability details with severity levels.
-
-### 🔹 3. Bandit (Python Source Code Analysis)
+### 🔹 2. Set Up Python Environment
 
 ```
-- name: Run Bandit Scan
-  run: bandit -ll -ii -r . -f json -o reports/bandit.json || true
-```
-- Tool: Bandit
-- Purpose: Performs Static Application Security Testing (SAST) for Python source code.
-- Detects issues such as:
--Insecure function usage (eval, exec)
--Hardcoded credentials
--Insecure file permissions
-- Output: reports/bandit.json → JSON report of security issues in code.
-
-
-### 🔹 4. Docker Scout (Optional Dependency Scanner)
+- name: Set up Python
+  uses: actions/setup-python@v4
+  with:
+    python-version: '3.x'
 
 ```
-# docker scout quickview
-# docker scout cves
+- Tool: Python
+- Purpose: Configures the Python runtime to execute scanning scripts.
+- Output: Python environment ready with required dependencies.
+
+### 🔹 3. Install Dependencies
 ```
-- Tool: Docker Scout
-- Purpose: Provides insights into container dependencies, image provenance, and supply chain vulnerabilities.
-- Benefit: Complements Trivy by analyzing image layers and dependencies more deeply.
-
-### 🔹 5. MITRE ATT&CK (Atomic Red Team Simulation)
-
-```
-- name: Run Atomic Red Team (MITRE ATT&CK)
-  shell: pwsh
-  run: |
-    git clone https://github.com/redcanaryco/atomic-red-team.git
-    git clone https://github.com/redcanaryco/invoke-atomicredteam.git
-    Import-Module ./invoke-atomicredteam/Invoke-AtomicRedTeam.psd1 -Force
-    Invoke-AtomicTest T1003 ...
-```
-- Tools:
--Atomic Red Team
--Invoke-AtomicRedTeam
-
-- Purpose: Simulates MITRE ATT&CK techniques against the container or application.
-- Example: T1003 – Credential Dumping test.
-- Output: reports/mitre_T1003.json → JSON report mapping vulnerabilities to real-world adversarial behaviors.
-
-### 🔹 6. NIST CSF Mapping
+- name: Install Dependencies
+  run: pip install -r requirements.txt
 
 ```
-- name: Map Results to NIST CSF
-  run: python scripts/mappings.py reports/ nist_report.json
-```
+- Tool: pip
+- Purpose: Installs Python dependencies (e.g., Pillow, ExifTool bindings, custom modules).
+- Output: All libraries installed for scanning and reporting.
 
-- Purpose: Maps scan results from Trivy, Bandit, and MITRE ATT&CK into NIST Cybersecurity Framework (CSF) categories:
-- Identify → Asset discovery issues
-- Protect → Missing patches, insecure configs
-- Detect → Intrusion detection gaps
-- Respond/Recover → Response & recovery mechanisms
 
-### 🔹 7. Report Generation (Charts + PDF)
+### 🔹 4. Run Image Steganography Scan
 
 ```
-- name: Generate Charts
-  run: python scripts/gen_charts.py
+- name: Run Image Stego Scanner
+  run: python scripts/scan_images.py --input ./images --output ./reports
 
+```
+- Tool: `scan_images.py` (custom Python script)
+- Purpose: Scans images in the `images/` directory for:
+- Hidden steganographic payloads
+- Suspicious metadata (via ExifTool)
+- Embedded scripts or hidden data
+- Output: `reports/scan_results.txt` (or JSON) with findings.
+
+### 🔹 5. Metadata Analysis (ExifTool)
+
+```
+- name: Run ExifTool Metadata Scan
+  run: exiftool ./images > reports/metadata_report.txt
+
+```
+- Tool: ExifTool
+- Purpose: Extracts metadata (EXIF, IPTC, XMP) to detect anomalies such as hidden comments, suspicious attributes, or embedded payloads.
+- Output: `reports/metadata_report.txt`
+
+
+### 🔹 6. Report Generation (Charts + PDF)
+
+```
 - name: Generate PDF Report
   run: python scripts/generate_report.py
+
 ```
+
+- Tools: ReportLab, Matplotlib
 - Purpose: Produces a professional PDF report consolidating:
-- Vulnerability details
-- Severity breakdown (with charts)
-- NIST CSF mapping
-- MITRE ATT&CK mapping
-- OWASP Top 10 mapping
+- Findings from image scans
+- Metadata anomalies
+- Severity breakdown (charts)
+- Compliance mappings (NIST, MITRE, OWASP)
+- Output: reports/final_report.pdf
 
 
-### 🔹 8. Upload Artifacts
+
+### 🔹 7. Upload Artifacts
 
 ```
 - name: Upload PDF Report
@@ -191,8 +175,8 @@ The workflow runs automatically on every push to the `main` branch and executes 
     path: report.pdf
 ```
 
-- Purpose: Uploads both the PDF report and raw JSON reports as GitHub build artifacts.
-- Benefit: Results can be downloaded and reviewed by security teams after each workflow run.
+- Purpose: Uploads scan results (`.txt`, `.json`, `.pdf`) as GitHub workflow artifacts.
+- Benefit: Security teams can download and review reports after each workflow run.
 
 
 
@@ -203,40 +187,39 @@ The workflow runs automatically on every push to the `main` branch and executes 
 
 ## 🎯 Purpose  
 The primary purpose of this project is to:  
-- **Automate vulnerability management** for Dockerized applications.  
-- Provide a **single, consolidated PDF report** instead of multiple scattered outputs.  
-- Help developers, DevOps, and security teams **integrate security into CI/CD pipelines (DevSecOps)**.  
-- Align findings with **compliance frameworks and attacker models**.  
+- **Automate security scanning of images** to detect hidden steganography payloads and malicious metadata.  
+- Provide a **single, consolidated report** instead of scattered outputs.  
+- Help developers, DevOps, and security teams **integrate image security into CI/CD pipelines (DevSecOps)**.  
+ 
 
 ---
 
 ## ✅ Advantages  
 
 - **Automated** → Scans run automatically with every code push (via GitHub Actions).  
-- **Comprehensive** → Covers Docker images, source code, and dependencies.  
-- **Framework-Aware** → Maps to NIST CSF, MITRE ATT&CK, and OWASP Top 10.  
-- **Professional Reports** → PDF reports with charts, severity analysis, and framework mappings.  
-- **Open-Source & Extensible** → Easily add new scanners or frameworks.  
+- **Comprehensive** → Covers hidden payloads, suspicious metadata, and steganographic techniques.  
+- **Professional Reports** → Reports can be generated in text, JSON, or PDF format with severity analysis and compliance mapping.  
+- **Open-Source & Extensible** → Easily add new detection modules or integrate other security frameworks.  
 
 ---
 
 ## ⚡ Challenges Faced  
 
-1. **Data Normalization** → Different scanners produce JSON in different formats.  
-2. **Framework Mapping** → Consistently mapping vulnerabilities across NIST, MITRE, and OWASP required custom logic (`mappings.py`).  
-3. **PDF Reporting** → Ensuring the final report is clear, visual, and boardroom-ready.  
-4. **Automation in CI/CD** → Ensuring scans work smoothly within GitHub Actions with minimal setup.  
+1. **Steganography Detection** → Detecting hidden payloads is more complex than traditional vulnerability scanning, requiring both metadata analysis and pixel-level inspection.  
+2. **Data Normalization** → Metadata and stego detection tools (e.g., ExifTool, StegExpose) produce outputs in different formats that need to be unified.  
+3. **Automation in CI/CD** → Ensuring lightweight execution of image scans within GitHub Actions without slowing down the pipeline.  
 
 ---
 
 ## 🖼️ Sample Report Preview  
 
-Below is a preview of the kind of report generated by the scanner:  
+Below is an example of the kind of report generated by the scanner:  
 
-![Download Vulnerability Test Report](https://github.com/ADITYADAS1999/Automated-Docker-Security-Scanner/blob/main/vulnerability_report.pdf)  
+![Image Security Report](https://github.com/ADITYADAS1999/StegoGuard-CI-CD/actions/runs/17509351227/artifacts/3942546239)  
 
 The PDF includes:  
-- Vulnerability summary tables.  
+- Image scan summaries and metadata anomalies.  
+- Detection of possible hidden steganographic payloads.  
 - Severity distribution charts.  
 - NIST CSF, MITRE ATT&CK, OWASP Top 10 mappings.  
 - Final consolidated recommendations.  
@@ -244,13 +227,14 @@ The PDF includes:
 ---
 
 ## 🔚 Conclusion  
-The **Automated Docker Security Scanner** provides a **complete security assessment workflow** for containerized applications.  
-By integrating scanning tools with industry-standard frameworks, it transforms raw scan data into **actionable insights** that can guide both developers and security teams.  
+The **ImageStegoScan-CI-CD** project provides a **complete security assessment workflow for image files**.  
+By integrating steganography detection tools and compliance frameworks into CI/CD pipelines, it transforms raw scan data into **actionable insights** that help prevent malicious image uploads.  
 
-Future Work:  
-- Add real-time **CVE database lookups**.  
-- Build a **web dashboard** for interactive vulnerability tracking.  
-- Extend support for more programming languages (Go, Java, etc.).  
+**Future Work:**  
+- Add advanced **AI/ML-based steganography detection**.  
+- Support for **additional image formats** (e.g., GIF, BMP, TIFF).  
+- Extend reporting to include **real-time dashboards** for security monitoring.  
+
 
 ---
 
