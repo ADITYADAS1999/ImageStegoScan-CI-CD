@@ -221,7 +221,6 @@ The PDF includes:
 - Image scan summaries and metadata anomalies.  
 - Detection of possible hidden steganographic payloads.  
 - Severity distribution charts.  
-- NIST CSF, MITRE ATT&CK, OWASP Top 10 mappings.  
 - Final consolidated recommendations.  
 
 ---
